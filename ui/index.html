@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Glitchless Deck</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  /* Glitchless (assets/brand/glitchless/BRAND.md): navy for text and frames, mint on navy, coral only for trouble. */
+  :root {
+    --navy: #14213d; --navy-2: #0e182e; --navy-3: #1d2e52;
+    --mint: #2ee6a6; --coral: #ff6b57; --mist: #f4f6fa; --white: #fff;
+    --panel: #fff; --border: #e0e5ee; --border-strong: #c9d1df;
+    --text: var(--navy); --text-2: #3b4966; --muted: #66758f;
+    --ok: #138a63; --ok-bg: #e3f5ee; --alert: #c8243c; --alert-bg: #fde8eb; --warn: #b5730a; --warn-bg: #fdf2dc;
+    --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --display: 'Outfit', var(--sans);
+    color-scheme: light;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--mist); color: var(--text); font: 15px/1.5 var(--sans); -webkit-font-smoothing: antialiased; }
+  button, input, select { font: inherit; }
+  code { font-family: var(--mono); font-size: .9em; background: #e9edf4; padding: 1px 5px; border-radius: 5px; }
+
+  header { background: var(--navy); color: var(--white); }
+  .bar { max-width: 980px; margin: 0 auto; padding: 14px 16px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .brand { display: flex; align-items: center; gap: 10px; margin-right: auto; }
+  .brand img { width: 40px; height: auto; display: block; }
+  .word { font: 800 22px/1 var(--display); letter-spacing: -.02em; }
+  .word span { color: var(--mint); }
+  .deckpill { display: flex; align-items: center; gap: 10px; background: var(--navy-3); border-radius: 999px; padding: 6px 8px 6px 14px; min-height: 40px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: #66758f; flex: none; }
+  .dot.ok { background: var(--mint); box-shadow: 0 0 0 4px rgba(46,230,166,.18); }
+  .dot.bad { background: var(--coral); box-shadow: 0 0 0 4px rgba(255,107,87,.18); }
+  .dot.busy { background: #f2a93b; }
+  .deckpill .what { font-weight: 600; font-size: 14px; }
+  .deckpill .what small { display: block; font-weight: 400; color: #c5d0e4; font-size: 12px; }
+  .pillbtn { background: transparent; border: 1px solid #3b4f7a; color: #dfe6f3; border-radius: 999px; padding: 5px 12px; font-size: 13px; cursor: pointer; }
+  .pillbtn:hover { border-color: var(--mint); color: var(--white); }
+
+  main { max-width: 980px; margin: 0 auto; padding: 24px 16px 64px; }
+  h2 { font: 700 20px/1.2 var(--display); margin: 28px 0 12px; letter-spacing: -.01em; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  h2:first-child { margin-top: 0; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; box-shadow: 0 1px 2px rgba(20,33,61,.04); }
+  .notice { border-left: 4px solid var(--coral); }
+
+  .onboard { display: grid; grid-template-columns: 1fr 180px; gap: 18px; align-items: center; }
+  .onboard img { width: 180px; height: auto; }
+  .onboard h3 { font: 700 18px/1.3 var(--display); margin: 0 0 8px; }
+  .onboard ol { margin: 0 0 14px; padding-left: 20px; color: var(--text-2); }
+  .onboard li { margin: 3px 0; }
+  .found { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  input[type=text] { border: 1px solid var(--border-strong); border-radius: 10px; padding: 9px 12px; width: 220px; background: var(--white); color: var(--text); }
+  input[type=text]:focus { outline: 2px solid var(--mint); outline-offset: 1px; }
+
+  .btn { border: 1px solid transparent; border-radius: 10px; padding: 9px 15px; font-weight: 600; font-size: 14px; cursor: pointer; background: var(--navy); color: var(--white); transition: background .12s, color .12s, border-color .12s; }
+  .btn:hover:not(:disabled) { background: var(--navy-3); }
+  .btn.mint { background: var(--mint); color: var(--navy); }
+  .btn.mint:hover:not(:disabled) { background: #5aedbb; }
+  .btn.ghost { background: var(--white); color: var(--navy); border-color: var(--border-strong); }
+  .btn.ghost:hover:not(:disabled) { border-color: var(--navy); background: var(--white); }
+  .btn.danger { background: var(--white); color: var(--alert); border-color: #f2c2c9; }
+  .btn:disabled { opacity: .4; cursor: default; }
+
+  .toggle { font: 500 14px var(--sans); color: var(--text-2); display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+  .toggle input { width: 16px; height: 16px; accent-color: var(--navy); }
+
+  .games { display: grid; gap: 12px; }
+  .game { display: grid; gap: 12px; }
+  .gtop { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center; }
+  .gname { font: 700 19px/1.2 var(--display); margin-right: 4px; }
+  .chip { font: 600 12px/1 var(--sans); padding: 5px 9px; border-radius: 999px; background: #e9edf4; color: var(--text-2); }
+  .chip.on { background: var(--ok-bg); color: var(--ok); }
+  .chip.pass { background: var(--ok-bg); color: var(--ok); }
+  .chip.fail { background: var(--alert-bg); color: var(--alert); }
+  .meta { color: var(--muted); font-size: 13.5px; word-break: break-all; }
+  .stats { display: flex; flex-wrap: wrap; gap: 8px; }
+  .stat { background: var(--mist); border: 1px solid var(--border); border-radius: 10px; padding: 7px 12px; min-width: 104px; }
+  .stat b { display: block; font: 700 18px/1.2 var(--display); }
+  .stat span { font-size: 12px; color: var(--muted); }
+  .stat.bad b { color: var(--alert); }
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .actions .sep { flex: 1; }
+  details.more { position: relative; }
+  details.more summary { list-style: none; }
+  details.more summary::-webkit-details-marker { display: none; }
+  .menu { position: absolute; right: 0; top: calc(100% + 6px); background: var(--white); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 12px 30px rgba(20,33,61,.14); padding: 6px; z-index: 5; min-width: 230px; }
+  .menu button { display: block; width: 100%; text-align: left; background: none; border: 0; padding: 9px 12px; border-radius: 8px; cursor: pointer; color: var(--text); font-size: 14px; }
+  .menu button:hover:not(:disabled) { background: var(--mist); }
+  .menu button.danger { color: var(--alert); }
+  .menu button:disabled { opacity: .4; cursor: default; }
+
+  .empty { text-align: center; padding: 30px 20px; }
+  .empty img { width: 150px; height: auto; }
+  .empty p { color: var(--text-2); margin: 8px auto; max-width: 520px; }
+  .problem { color: var(--alert); font-weight: 500; }
+
+  .out { margin-top: 28px; }
+  .outhead { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .outhead h2 { margin: 0; }
+  pre { margin: 0; background: var(--navy-2); color: #d9e2f2; border-radius: 14px; padding: 14px 16px; font: 13px/1.55 var(--mono); white-space: pre-wrap; word-break: break-word; max-height: 420px; overflow: auto; }
+  pre .ok { color: var(--mint); } pre .bad { color: #ff8b7b; }
+  footer { color: var(--muted); font-size: 13px; margin-top: 36px; display: flex; flex-wrap: wrap; gap: 6px 18px; }
+  @media (max-width: 640px) {
+    .onboard { grid-template-columns: 1fr; }
+    .onboard img { width: 120px; order: -1; }
+    .word { font-size: 19px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <div class="brand"><img src="/mark-dark.svg" alt=""><div class="word">Glitchless <span>Deck</span></div></div>
+    <div class="deckpill" id="pill"><span class="dot busy"></span><div class="what">Looking for your Deck<small>one moment</small></div></div>
+  </div>
+</header>
+<main>
+  <div id="deck"></div>
+  <h2 id="gamesTitle">Games <label class="toggle" title="Adds --glitchless: the game reports to the Glitchless server running on this computer"><input type="checkbox" id="glitch"> Report to Glitchless on this computer</label></h2>
+  <div class="games" id="games"></div>
+  <section class="out" id="out" hidden>
+    <div class="outhead"><h2 id="jobtitle"></h2><span class="chip" id="jobstate"></span></div>
+    <pre id="log"></pre>
+  </section>
+  <footer><span id="ver"></span><span>Pairing gives this computer full control of the Deck, as Valve's devkit tool does.</span><span>Steam Deck is a trademark of Valve Corporation.</span></footer>
+</main>
+<script>
+const $ = (id) => document.getElementById(id);
+function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+function post(action, body) { return fetch('/api/' + action, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Glitchless-Deck': '1' }, body: JSON.stringify(body || {}) }).then(() => refresh(false)); }
+function ago(ms) {
+  if (!ms) return 'not built yet';
+  const m = (Date.now() - ms) / 60000;
+  return m < 2 ? 'built just now' : m < 90 ? `built ${Math.round(m)} min ago` : m < 2880 ? `built ${Math.round(m / 60)} h ago` : `built ${Math.round(m / 1440)} days ago`;
+}
+const ENGINE = { godot: 'Godot', unity: 'Unity', unreal: 'Unreal', web: 'Web' };
+const num = (v, d = 1) => (v == null ? '–' : (Math.round(v * 10 ** d) / 10 ** d).toString());
+const glitch = () => $('glitch').checked;
+try { $('glitch').checked = localStorage.getItem('glitchless-deck.glitch') === '1'; } catch {}
+$('glitch').onchange = () => { try { localStorage.setItem('glitchless-deck.glitch', glitch() ? '1' : '0'); } catch {} };
+
+function drawPill(d, busy) {
+  const pill = $('pill'); pill.replaceChildren();
+  const ready = d && d.paired && d.login && d.steam !== false;
+  const state = !d ? 'busy' : !d.paired ? '' : ready ? 'ok' : 'bad';
+  pill.append(el('span', 'dot ' + state));
+  const what = el('div', 'what');
+  if (!d) what.append('Looking for your Deck', el('small', null, 'one moment'));
+  else if (!d.paired) what.append('No Deck paired', el('small', null, (d.found || []).length ? `${d.found.length} on this network` : 'pair one below'));
+  else what.append(d.deck.name, el('small', null, `${d.deck.address} · ${ready ? 'ready' : d.login ? 'Steam is not running' : 'not answering'}`));
+  pill.append(what);
+  if (d && d.paired) { const b = el('button', 'pillbtn', 'Check'); b.onclick = () => refresh(true); b.disabled = busy; pill.append(b); }
+}
+
+function drawDeck(d, busy) {
+  const box = $('deck'); box.replaceChildren();
+  if (!d) return;
+  if (!d.paired) {
+    const card = el('div', 'card onboard');
+    const left = el('div');
+    left.append(el('h3', null, 'Pair your Steam Deck'));
+    const steps = el('ol');
+    ['On the Deck: Settings > System > Enable Developer Mode', 'Settings > Developer > Pair new host, and leave it open', 'Press Pair here, then approve the request on the Deck'].forEach((s) => steps.append(el('li', null, s)));
+    left.append(steps);
+    if ((d.found || []).length) {
+      const found = el('div', 'found');
+      d.found.forEach((f) => { const b = el('button', 'btn ghost', `Pair ${f.name} (${f.address})`); b.disabled = busy; b.onclick = () => post('pair', { address: f.address }); found.append(b); });
+      left.append(found);
+    }
+    const row = el('div', 'row');
+    const address = el('input'); address.type = 'text'; address.placeholder = 'Deck address (optional)';
+    const go = el('button', 'btn mint', 'Pair'); go.disabled = busy; go.onclick = () => post('pair', { address: address.value.trim() });
+    row.append(address, go);
+    left.append(row, el('p', 'meta', "The address is under Settings > Internet on the Deck. Pairing gives this computer full control of the Deck."));
+    const img = el('img'); img.src = '/glitchy-wave.png'; img.alt = '';
+    card.append(left, img);
+    box.append(card);
+  } else if (!d.login || d.steam === false) {
+    const card = el('div', 'card notice');
+    card.append(el('strong', null, d.login ? `${d.deck.name} is awake, but Steam is not running.` : `${d.deck.name} is not answering.`));
+    card.append(el('p', 'meta', d.login ? 'Wait for Gaming Mode to finish loading, then check again.' : `Last seen at ${d.deck.address}. Wake it and keep it on this network; it is found again if its address changed.`));
+    const row = el('div', 'row');
+    const again = el('button', 'btn ghost', 'Check again'); again.onclick = () => refresh(true);
+    const redo = el('button', 'btn ghost', 'Pair again'); redo.disabled = busy; redo.onclick = () => post('pair', {});
+    row.append(again, redo); card.append(row);
+    box.append(card);
+  }
+}
+
+function stat(value, label, bad) { const s = el('div', 'stat' + (bad ? ' bad' : '')); s.append(el('b', null, value), el('span', null, label)); return s; }
+
+function drawGames(state, busy) {
+  const box = $('games'); box.replaceChildren();
+  const d = state.deck || {};
+  const ready = d.paired && d.login && d.steam !== false;
+  const onDeck = new Set(d.on_deck || []);
+  if (state.problem) box.append(el('p', 'problem', state.problem));
+  if (!state.games.length && !state.problem) {
+    const empty = el('div', 'card empty');
+    const img = el('img'); img.src = '/glitchy-play.png'; img.alt = '';
+    const p1 = el('p'); p1.append('No games here yet. In your game’s folder, run ', el('code', null, 'npx glitchless-deck init'), ' and start this page from there, or list a project with ', el('code', null, 'glitchless-deck add <file>'), '.');
+    empty.append(img, p1, el('p', 'meta', 'Started in ' + state.cwd));
+    box.append(empty);
+  }
+  for (const g of state.games) {
+    const card = el('div', 'card game');
+    const top = el('div', 'gtop');
+    top.append(el('span', 'gname', g.name));
+    if (g.engine) top.append(el('span', 'chip', ENGINE[g.engine] + (g.web ? ' · kiosk' : '')));
+    if (g.proton) top.append(el('span', 'chip', 'Proton'));
+    if (onDeck.has(g.id)) top.append(el('span', 'chip on', 'On the Deck'));
+    if (g.verdict) top.append(el('span', 'chip ' + g.verdict.verdict, g.verdict.verdict === 'pass' ? 'PASS vs baseline' : `FAIL vs baseline: ${g.verdict.regressions.length} regression${g.verdict.regressions.length === 1 ? '' : 's'}`));
+    const where = el('div', 'meta', `${g.id} · ${ago(g.built)} · ${g.folder_rel}`);
+    where.title = g.folder;
+    card.append(top, where);
+    if (g.latest) {
+      const stats = el('div', 'stats');
+      const worse = new Set(g.verdict?.ids || []);
+      stats.append(stat(num(g.latest.fps), 'frames per second'), stat(num(g.latest.p95, 2) + ' ms', 'p95 frame time', worse.has('frame_p95')), stat(num(g.latest.slow_pct) + '%', 'slow frames', worse.has('pct_frames_over_budget')), stat(String(g.latest.hitches ?? '–'), 'hitches', worse.has('hitches_per_min')));
+      if (g.latest.update_ms != null) stats.append(stat(num(g.latest.update_ms, 2) + ' ms', 'update CPU p50', worse.has('update_cpu_ms')));
+      if (g.latest.render_ms != null) stats.append(stat(num(g.latest.render_ms, 2) + ' ms', 'render CPU p50', worse.has('render_cpu_ms')));
+      const regressed = g.verdict?.regressions?.length ? ` · worse than baseline: ${g.verdict.regressions.join(', ')}` : '';
+      card.append(stats, el('div', 'meta', `Last measured on the Deck ${new Date(g.latest.created).toLocaleString()}${g.baseline ? ` · baseline from ${new Date(g.baseline.created).toLocaleString()}` : ' · no baseline saved yet'}${regressed}`));
+    }
+    const actions = el('div', 'actions');
+    const off = busy || !ready;
+    if (g.builds) { const b = el('button', 'btn mint', 'Build and send'); b.disabled = off; b.onclick = () => post('send', { game: g.id, build: true, glitchless: glitch() }); actions.append(b); }
+    const quick = el('button', g.builds ? 'btn ghost' : 'btn mint', g.builds ? 'Send as built' : 'Send to Deck'); quick.disabled = off || !g.ready;
+    quick.onclick = () => post('send', { game: g.id, build: false, glitchless: glitch() }); actions.append(quick);
+    const play = el('button', 'btn', 'Launch'); play.disabled = off || !onDeck.has(g.id); play.onclick = () => post('launch', { game: g.id }); actions.append(play);
+    if (!g.web) { const m = el('button', 'btn ghost', g.baseline ? 'Measure and compare' : 'Measure'); m.disabled = off || !onDeck.has(g.id); m.onclick = () => post('measure', { game: g.id, glitchless: glitch() }); actions.append(m); }
+    actions.append(el('span', 'sep'));
+    const more = el('details', 'more');
+    const sum = el('summary', 'btn ghost', 'More'); more.append(sum);
+    const menu = el('div', 'menu');
+    const item = (label, fn, enabled, cls) => { const b = el('button', cls, label); b.disabled = !enabled; b.onclick = () => { more.open = false; fn(); }; menu.append(b); };
+    if (!g.web) item('Measure and save as baseline', () => post('measure', { game: g.id, save: 'baseline', glitchless: glitch() }), !off && onDeck.has(g.id));
+    item('Close it on the Deck', () => post('stop', { game: g.id }), !off);
+    item('Show its logs', () => post('logs', { game: g.id }), !off && onDeck.has(g.id));
+    item('Take it off the Deck', () => { if (confirm(`Take ${g.id} off the Deck? Its files, library entry and artwork go. Saves in its own user folder stay.`)) post('remove', { game: g.id }); }, !off && onDeck.has(g.id), 'danger');
+    more.append(menu); actions.append(more);
+    card.append(actions);
+    box.append(card);
+  }
+}
+
+function drawJob(job) {
+  const shown = job.title !== '';
+  $('out').hidden = !shown;
+  if (!shown) return;
+  $('jobtitle').textContent = job.title;
+  const chip = $('jobstate');
+  chip.textContent = job.running ? 'running' : job.ok ? 'done' : job.code === 1 ? 'regression' : 'stopped';
+  chip.className = 'chip ' + (job.running ? '' : job.ok ? 'pass' : 'fail');
+  const text = job.lines.join('\n') || (job.running ? 'Working...' : '');
+  const log = $('log');
+  if (log.dataset.text !== text) {
+    log.dataset.text = text;
+    log.replaceChildren();
+    for (const line of job.lines.length ? job.lines : [text]) {
+      const span = el('span', /^Done in|PASS|is running on|Paired with/.test(line) ? 'ok' : /FAIL|failed|Cannot|cannot|not running|refused/.test(line) ? 'bad' : null, line + '\n');
+      log.append(span);
+    }
+    log.scrollTop = log.scrollHeight;
+  }
+}
+
+let lastKey = '';
+let wasRunning = false;
+function draw(state) {
+  const busy = state.job.running;
+  $('ver').textContent = 'glitchless-deck ' + state.version;
+  const key = JSON.stringify([state.games, state.deck, busy, state.problem, document.querySelector('details.more[open]') ? 1 : 0]);
+  if (key !== lastKey && !document.querySelector('details.more[open]')) {
+    lastKey = key;
+    drawPill(state.deck, busy);
+    drawDeck(state.deck, busy);
+    drawGames(state, busy);
+  }
+  drawJob(state.job);
+}
+function refresh(fresh) {
+  return fetch('/api/state' + (fresh ? '?fresh' : '')).then((r) => r.json()).then((state) => {
+    draw(state);
+    if (wasRunning && !state.job.running) refresh(true);
+    wasRunning = state.job.running;
+  }).catch(() => {});
+}
+refresh(false);
+setInterval(() => refresh(false), 1000);
+</script>
+</body>
+</html>

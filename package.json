@@ -1,0 +1,55 @@
+{
+  "name": "glitchless-deck",
+  "version": "0.1.0",
+  "description": "Send a game build from any computer (macOS, Windows or Linux) to a Steam Deck on your network, put it in the Deck's library, launch it and measure it with Glitchless. Godot, Unity, Unreal and web games; made for coding agents too.",
+  "keywords": [
+    "steam-deck",
+    "steamdeck",
+    "steamos",
+    "devkit",
+    "gamedev",
+    "game-development",
+    "godot",
+    "unity",
+    "unreal",
+    "deploy",
+    "performance",
+    "game-observability",
+    "coding-agent",
+    "mcp"
+  ],
+  "homepage": "https://github.com/glitchless-gg/glitchless-deck#readme",
+  "bugs": {
+    "url": "https://github.com/glitchless-gg/glitchless-deck/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/glitchless-gg/glitchless-deck.git"
+  },
+  "license": "MIT",
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "bin": {
+    "glitchless-deck": "bin/glitchless-deck.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "ui",
+    "SKILL.md",
+    "NOTICE.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "prepublishOnly": "npm test"
+  },
+  "dependencies": {
+    "glitchless-playtest": "^0.2.0"
+  }
+}
